@@ -1,0 +1,758 @@
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+using namespace std;
+
+class Header
+{
+private:
+	uint8_t PacketSize = 188;
+	uint16_t PID = 0;
+	uint16_t PIDtemp = 0;
+	uint8_t TSC = 0;
+	uint8_t AFC = 0;
+	uint8_t CC = 0;
+	uint8_t lastCC = 0;
+	uint8_t SB = 0;
+	uint8_t E = 0;
+	uint8_t S = 0;
+	uint8_t T = 0;
+
+public:
+	void Parser(char c, int p) {
+		if (p % PacketSize == 0) {
+			SB = c;
+		}
+
+		if (p % PacketSize == 1)
+		{
+			E = 0;
+			S = 0;
+			T = 0;
+
+			E = ((c >> 7) & 1);
+			S = ((c >> 6) & 1);
+			T = ((c >> 5) & 1);
+
+
+			for (int i = 4; i >= 0; i--) {
+				PID += ((c >> i) & 1) * pow(2, (i + 8)); //poniewaz PID znajduje sie w dwoch bajtach, tu liczony jest bardziej znaczacy bajt 
+			}
+		}
+		if (p % PacketSize == 2)
+		{
+			if (PID == 136) { //tylko audio
+				lastCC = CC; //zachowujemy poprzednia wartosc CC do sprawdzania ciaglosci
+			}
+
+			PID = 0;
+
+			for (int i = 7; i >= 0; i--) {
+				PID += ((c >> i) & 1) * pow(2, i);  //mniej znaczacy bajt
+			}
+
+			PIDtemp = PID;
+		}
+		if (p % PacketSize == 3)
+		{
+			TSC = 0;
+			AFC = 0;
+			CC = 0;
+
+			for (int i = 7; i >= 0; i--) {
+				if (i > 5)
+					TSC += ((c >> i) & 1) * pow(2, i - 6);  //7 i 6 bit
+				if (i == 5 or i == 4)
+					AFC += ((c >> i) & 1) * pow(2, i - 4);  //5 i 4 bit
+				if (i < 4)
+					CC += ((c >> i) & 1) * pow(2, i);       //3,2,1,0 bit
+			}
+		}
+	}
+
+	void Print() {
+		cout << " TS: SB = " << static_cast<int>(SB);
+		cout << " E = " << static_cast<int>(E); //wykrywa jedynke (maja przeznaczony jeden bit)
+		cout << " S = " << static_cast<int>(S);
+		cout << " T = " << static_cast<int>(T);
+		cout << " PID = " << static_cast<int>(PID);
+		cout << " TSC = " << static_cast<int>(TSC) << " AFC = " << static_cast<int>(AFC) << " CC = " << static_cast<int>(CC);
+	}
+
+	uint8_t getAFC() { return AFC; }
+	uint8_t  getS() { return S; }
+	uint8_t getCC() { return CC; }
+	uint8_t getLastCC() { return lastCC; }
+	uint8_t  getPID() { return PIDtemp; }
+};
+
+class adaptationField
+{
+private:
+	bool PRdone = false;
+	bool ORdone = false;
+	bool SPidone = false;
+	bool TPdone = false;
+	bool EXdone = false;
+	bool AFdone = false;
+
+	uint8_t PacketSize = 188;
+	uint8_t AFL = 0;
+	uint8_t DC = 0;
+	uint8_t RA = 0;
+	uint8_t SPi = 0;
+	uint8_t PR = 0;
+	uint8_t OR = 0;
+	uint8_t SPf = 0;
+	uint8_t TP = 0;
+	uint8_t EX = 0;
+
+	uint64_t program_clock_reference_base = 0;
+	uint16_t program_clock_reference_extension = 0;
+
+	uint64_t original_program_clock_reference_base = 0;
+	uint16_t original_program_clock_reference_extension = 0;
+
+	uint8_t splice_countdown = 0;
+
+	uint8_t transport_private_data_length = 0;
+	uint8_t private_data_byte = 0;
+
+	uint8_t adaptation_field_extension_length = 0;
+	uint8_t ltwFlag = 0;
+	uint8_t piecewiseRateFlag = 0;
+	uint8_t seamlessSpliceFlag = 0;
+
+	uint8_t ltw_valid_flag = 0;
+	uint16_t ltw_offset = 0;
+
+	uint32_t piecewise_rate = 0;
+
+	uint8_t splice_type = 0;
+	uint32_t DTS_next_AU = 0;
+	uint8_t marker_bit = 0;
+
+	uint8_t stuffingCount = 0;
+	uint8_t offset_value = 0;
+public:
+	void Parser(char c, int p) {
+		if (p % PacketSize == 4) {
+
+			PRdone = false;
+			ORdone = false;
+			SPidone = false;
+			TPdone = false;
+			EXdone = false;
+			AFdone = false;
+
+			AFL = static_cast<int>(c);
+			stuffingCount = AFL;
+		}
+
+		if (AFL > 0) {
+			if (p % PacketSize == 5) {
+
+				DC = ((c >> 7) & 1);
+				RA = ((c >> 6) & 1);
+				SPi = ((c >> 5) & 1);
+				PR = ((c >> 4) & 1);
+				OR = ((c >> 3) & 1);
+				SPf = ((c >> 2) & 1);
+				TP = ((c >> 1) & 1);
+				EX = ((c >> 0) & 1);
+
+				stuffingCount--;	//AFL zajmuje 1 bajt
+				AFdone = true;
+			}
+
+			if (p % PacketSize > 5) {
+				if (PR) { //PCR
+					if (p % PacketSize == 6) {
+						program_clock_reference_base = 0;
+
+						for (int i = 7; i >= 0; i--) {
+							program_clock_reference_base += ((c >> i) & 1) * pow(2, i + 25);
+						}
+					}
+
+					if (p % PacketSize == 7) {
+						for (int i = 7; i >= 0; i--) {
+							program_clock_reference_base += ((c >> i) & 1) * pow(2, i + 17);
+						}
+					}
+
+					if (p % PacketSize == 8) {
+						for (int i = 7; i >= 0; i--) {
+							program_clock_reference_base += ((c >> i) & 1) * pow(2, i + 9);
+						}
+					}
+
+					if (p % PacketSize == 9) {
+						for (int i = 7; i >= 0; i--) {
+							program_clock_reference_base += ((c >> i) & 1) * pow(2, i + 1);
+						}
+					}
+
+					if (p % PacketSize == 10) {
+						program_clock_reference_base += ((c >> 7) & 1) * pow(2, 1);
+
+						program_clock_reference_extension = 0;
+
+						program_clock_reference_extension += ((c >> 0) & 1) * pow(2, 1);
+
+					}
+
+					if (p % PacketSize == 11) {
+						for (int i = 7; i >= 0; i--) {
+							program_clock_reference_extension += ((c >> i) & 1) * pow(2, i);
+						}
+
+						stuffingCount -= 6; //PCR zajmuje 6 bajtow
+						offset_value += 6;
+						PRdone = true;
+					}
+				}
+				else if (!PR) {
+					PRdone = true;
+				}
+
+				if (OR) { //OPCR
+					if (p % PacketSize == (6 + offset_value)) { //w zaleznosci od istniejacych flag odpowiednio przesuwamy moment czytania bitow
+						original_program_clock_reference_base = 0;
+
+						for (int i = 7; i >= 0; i--) {
+							original_program_clock_reference_base += ((c >> i) & 1) * pow(2, i + 25);
+						}
+					}
+
+					if (p % PacketSize == (7 + offset_value)) {
+						for (int i = 7; i >= 0; i--) {
+							original_program_clock_reference_base += ((c >> i) & 1) * pow(2, i + 17);
+						}
+					}
+
+					if (p % PacketSize == (8 + offset_value)) {
+						for (int i = 7; i >= 0; i--) {
+							original_program_clock_reference_base += ((c >> i) & 1) * pow(2, i + 9);
+						}
+					}
+
+					if (p % PacketSize == (9 + offset_value)) {
+						for (int i = 7; i >= 0; i--) {
+							original_program_clock_reference_base += ((c >> i) & 1) * pow(2, i + 1);
+						}
+					}
+
+					if (p % PacketSize == (10 + offset_value)) {
+						original_program_clock_reference_base += ((c >> 7) & 1) * pow(2, 1);
+
+						original_program_clock_reference_extension = 0;
+
+						original_program_clock_reference_extension += ((c >> 0) & 1) * pow(2, 1);
+					}
+
+					if (p % PacketSize == (11 + offset_value)) {
+						for (int i = 7; i >= 0; i--) {
+							original_program_clock_reference_extension += ((c >> i) & 1) * pow(2, i);
+						}
+
+						stuffingCount -= 6;
+						offset_value += 6;
+						ORdone = true;
+					}
+				}
+				else if (!OR) ORdone = true;
+
+				if (SPi) {
+					if (p % PacketSize == (6 + offset_value)) {
+						splice_countdown = 0;
+						for (int i = 7; i >= 0; i--) {
+							splice_countdown += ((c >> i) & 1) * pow(2, i);
+						}
+						stuffingCount -= 1;
+						offset_value += 1;
+						SPidone = true;
+					}
+				}
+				else if (!SPi) SPidone = true;
+
+				if (TP) {
+					if (p % PacketSize == (6 + offset_value)) {
+						transport_private_data_length = 0;
+						for (int i = 7; i >= 0; i--) {
+							transport_private_data_length += ((c >> i) & 1) * pow(2, i);
+						}
+					}
+					if (p % PacketSize == (7 + offset_value)) {
+						private_data_byte = 0;
+						for (int i = transport_private_data_length; i >= 0; i--) {
+							private_data_byte += ((c >> i) & 1) * pow(2, i);
+						}
+						stuffingCount -= 2;
+						offset_value += 2;
+						TPdone = true;
+					}
+				}
+				else if (!TP) TPdone = true;
+
+				if (EX) {
+					if (p % PacketSize == (6 + offset_value)) {
+						adaptation_field_extension_length = 0;
+						for (int i = 7; i >= 0; i--) {
+							adaptation_field_extension_length += ((c >> i) & 1) * pow(2, i);
+						}
+					}
+
+					if (p % PacketSize == (7 + offset_value)) {
+						ltwFlag = ((c >> 7) & 1);
+						piecewiseRateFlag = ((c >> 6) & 1);
+						seamlessSpliceFlag = ((c >> 5) & 1);
+
+						if (seamlessSpliceFlag) {
+							stuffingCount -= 5;
+							offset_value += 5;
+						}
+					}
+
+					if (ltwFlag) {
+						if (p % PacketSize == (8 + offset_value)) {
+							ltw_valid_flag = 0;
+							ltw_offset = 0;
+							ltw_valid_flag = ((c >> 7) & 1);
+							for (int i = 6; i >= 0; i--) {
+								ltw_offset += ((c >> i) & 1) * pow(2, i + 8);
+							}
+						}
+
+						if (p % PacketSize == (9 + offset_value)) {
+							for (int i = 7; i >= 0; i--) {
+								ltw_offset += ((c >> i) & 1) * pow(2, i);
+							}
+
+							stuffingCount -= 2;
+							offset_value += 2;
+						}
+					}
+
+					if (piecewiseRateFlag) {
+						if (p % PacketSize == (10 + offset_value)) {
+							piecewise_rate = 0;
+							for (int i = 5; i >= 0; i--) {
+								piecewise_rate += ((c >> i) & 1) * pow(2, i + 16);
+							}
+						}
+
+						if (p % PacketSize == (11 + offset_value)) {
+							for (int i = 7; i >= 0; i--) {
+								piecewise_rate += ((c >> i) & 1) * pow(2, i + 8);
+							}
+						}
+
+						if (p % PacketSize == (12 + offset_value)) {
+							for (int i = 7; i >= 0; i--) {
+								piecewise_rate += ((c >> i) & 1) * pow(2, i);
+							}
+
+							stuffingCount -= 3;
+							offset_value += 3;
+						}
+					}
+
+					if (seamlessSpliceFlag) {
+						if (p % PacketSize == (13 + offset_value)) {
+							DTS_next_AU = 0;
+							marker_bit = 0;
+							splice_type = 0;
+
+							for (int i = 7; i >= 4; i--) {
+								splice_type += ((c >> i) & 1) * pow(2, i);
+							}
+
+							for (int i = 3; i >= 1; i--) {
+								DTS_next_AU += ((c >> i) & 1) * pow(2, i + 28);
+							}
+
+							marker_bit += ((c >> 1) & 1) * pow(2, 3);
+						}
+
+						if (p % PacketSize == (14 + offset_value)) {
+							for (int i = 7; i >= 0; i--) {
+								DTS_next_AU += ((c >> i) & 1) * pow(2, i + 22);
+							}
+						}
+
+						if (p % PacketSize == (15 + offset_value)) {
+							for (int i = 7; i >= 1; i--) {
+								DTS_next_AU += ((c >> i) & 1) * pow(2, i + 14);
+							}
+							marker_bit += ((c >> 1) & 1) * pow(2, 2);
+						}
+
+						if (p % PacketSize == (16 + offset_value)) {
+							for (int i = 7; i >= 0; i--) {
+								DTS_next_AU += ((c >> i) & 1) * pow(2, i + 7);
+							}
+						}
+
+						if (p % PacketSize == (17 + offset_value)) {
+							for (int i = 7; i >= 1; i--) {
+								DTS_next_AU += ((c >> i) & 1) * pow(2, i - 1);
+							}
+							marker_bit += ((c >> 1) & 1) * pow(2, 1);
+
+							stuffingCount -= 5;
+							offset_value += 5;
+							EXdone = true;
+						}
+					}
+				}
+				else if (!EX) EXdone = true;
+
+				if (Alldone()) { //drukowanie w zaleznosci od flagi
+					if (p % PacketSize == (6 + offset_value)) {
+						Print();
+					}
+				}
+			}
+		}
+	}
+
+	void Print() {
+		cout << " AF: L = " << static_cast<int>(AFL);
+		cout << " DC = " << static_cast<int>(DC);
+		cout << " RA = " << static_cast<int>(RA);
+		cout << " SPi = " << static_cast<int>(SPi);
+		cout << " PR = " << static_cast<int>(PR);
+		cout << " OR = " << static_cast<int>(OR);
+		cout << " SPf = " << static_cast<int>(SPf);
+		cout << " TP = " << static_cast<int>(TP);
+		cout << " EX = " << static_cast<int>(EX);
+
+		if (PR) {
+			cout << " PCR = " << static_cast<int>(program_clock_reference_base * 300 + program_clock_reference_extension);
+		}
+
+		if (OR) {
+			cout << " OPCR = " << static_cast<int>(original_program_clock_reference_base);
+		}
+
+		cout << " Stuffing = " << static_cast<int>(stuffingCount);
+	}
+
+	int getOffsetValue() {
+		return offset_value; //przesuwany moment odczytu PES header w zaleznosci od flag AF
+	}
+
+	bool Alldone() {
+		return (PRdone and ORdone and SPidone and TPdone and EXdone and AFdone);
+	}
+
+	uint8_t getLength() { return AFL; }
+};
+
+class PES_PacketHeader
+{
+public:
+	uint8_t PacketSize = 188;
+protected:
+	uint32_t m_PacketStartCodePrefix = 0;
+	uint32_t PTS = 0;
+	uint32_t DTS = 0;
+	double timePTS = 0;
+	double timeDTS = 0;
+	uint8_t m_StreamId = 0;
+	uint16_t m_PacketLength = 0;
+	uint16_t m_PacketLengthTemp = 0;
+	bool extension = false;
+	bool PTSflag = false;
+	bool DTSflag = false;
+public:
+	void Parser(char c, int p, adaptationField AF) {
+		if (p % PacketSize == (6 + AF.getOffsetValue())) { //w przypadku gdy AF jest rozszerzony, alldone informuje o zakonczeniu AF
+			for (int i = 7; i >= 0; i--) {
+				m_PacketStartCodePrefix += ((c >> i) & 1) * pow(2, (i + 16));
+			}
+		}
+
+		if (p % PacketSize == (7 + AF.getOffsetValue())) {
+			for (int i = 7; i >= 0; i--) {
+				m_PacketStartCodePrefix += ((c >> i) & 1) * pow(2, (i + 8));
+			}
+		}
+
+		if (p % PacketSize == (8 + AF.getOffsetValue())) {
+			for (int i = 7; i >= 0; i--) {
+				m_PacketStartCodePrefix += ((c >> i) & 1) * pow(2, (i));
+			}
+			cout << " PES: PSCP = " << static_cast<int>(m_PacketStartCodePrefix);
+			m_PacketStartCodePrefix = 0;
+		}
+
+		if (p % PacketSize == (9 + AF.getOffsetValue())) {
+			m_StreamId = 0;
+
+			for (int i = 7; i >= 0; i--) {
+				m_StreamId += ((c >> i) & 1) * pow(2, (i));
+			}
+			cout << " SID = " << static_cast<int>(m_StreamId);
+			if (m_StreamId == 0b10111101 or (0b11000000 <= m_StreamId <= 0b11011111) or (0b11100000 <= m_StreamId <= 0b11101111) or m_StreamId == 0b10111101) {
+				extension = true;
+			}
+			else {
+				extension = false;
+			}
+		}
+
+		if (p % PacketSize == (10 + AF.getOffsetValue())) {
+			for (int i = 7; i >= 0; i--) {
+				m_PacketLength += ((c >> i) & 1) * pow(2, (i + 8));
+			}
+		}
+
+		if (p % PacketSize == (11 + AF.getOffsetValue())) {
+			for (int i = 7; i >= 0; i--) {
+				m_PacketLength += ((c >> i) & 1) * pow(2, (i));
+			}
+			cout << " L = " << static_cast<int>(m_PacketLength);
+			m_PacketLengthTemp = m_PacketLength;
+			m_PacketLength = 0;
+		}
+
+		if (extension) { //liczymy dlugosc naglowka
+			if (p % PacketSize == (13 + AF.getOffsetValue())) {
+				if (((c >> 7) & 1)) { //sprawdzamy czy 10 lub 11
+					PTSflag = true;
+				}
+				if (((c >> 6) & 1)) {
+					DTSflag = true;
+				}
+				else if (!((c >> 7) & 1)) {
+					PTSflag = false;
+					DTSflag = false;
+				}
+			}
+
+			if (PTSflag) {
+				if (p % PacketSize == (15 + AF.getOffsetValue())) {
+					PTS = 0;
+					for (int i = 3; i >= 1; i--) {
+						PTS += ((c >> i) & 1) * pow(2, i + 28);
+					}
+				}
+				if (p % PacketSize == (16 + AF.getOffsetValue())) {
+					for (int i = 7; i >= 0; i--) {
+						PTS += ((c >> i) & 1) * pow(2, i + 22);
+					}
+				}
+
+				if (p % PacketSize == (17 + AF.getOffsetValue())) {
+					for (int i = 7; i >= 1; i--) {
+						PTS += ((c >> i) & 1) * pow(2, i + 14);
+					}
+				}
+
+				if (p % PacketSize == (18 + AF.getOffsetValue())) {
+					for (int i = 7; i >= 0; i--) {
+						PTS += ((c >> i) & 1) * pow(2, i + 7);
+					}
+				}
+
+				if (p % PacketSize == (19 + AF.getOffsetValue())) {
+					for (int i = 7; i >= 1; i--) {
+						PTS += ((c >> i) & 1) * pow(2, i - 1);
+					}
+					cout << " PTS = " << static_cast<int>(PTS);
+					timePTS = PTS;
+					timePTS = timePTS / 90000;
+					cout << " (Time=" << timePTS << "s) ";
+				}
+			}
+
+			if (DTSflag) {
+				if (p % PacketSize == (20 + AF.getOffsetValue())) {
+					DTS = 0;
+					for (int i = 3; i >= 1; i--) {
+						DTS += ((c >> i) & 1) * pow(2, i + 28);
+					}
+				}
+				if (p % PacketSize == (21 + AF.getOffsetValue())) {
+					for (int i = 7; i >= 0; i--) {
+						DTS += ((c >> i) & 1) * pow(2, i + 22);
+					}
+				}
+
+				if (p % PacketSize == (22 + AF.getOffsetValue())) {
+					for (int i = 7; i >= 1; i--) {
+						DTS += ((c >> i) & 1) * pow(2, i + 14);
+					}
+				}
+
+				if (p % PacketSize == (23 + AF.getOffsetValue())) {
+					for (int i = 7; i >= 0; i--) {
+						DTS += ((c >> i) & 1) * pow(2, i + 7);
+					}
+				}
+
+				if (p % PacketSize == (24 + AF.getOffsetValue())) {
+					for (int i = 7; i >= 1; i--) {
+						DTS += ((c >> i) & 1) * pow(2, i - 1);
+					}
+					cout << " DTS = " << static_cast<int>(DTS);
+					timeDTS = DTS;
+					timeDTS = timeDTS / 90000;
+					cout << " (Time=" << timeDTS << "s) ";
+				}
+			}
+		}
+	}
+
+public:
+	//PES packet header
+	uint32_t getPacketStartCodePrefix() const { return m_PacketStartCodePrefix; }
+	uint8_t getStreamId() const { return m_StreamId; }
+	uint16_t getPacketLength() { return m_PacketLengthTemp; }
+	bool extensionPresent() { return extension; }
+	bool PTS_present() { return PTSflag; }
+	bool DTS_present() { return DTSflag; }
+};
+
+class PES_Assembler
+{
+protected:
+	uint8_t PacketSize = 188;
+	int PESdataCounter = 0;
+	int headerSize = 0;
+	PES_PacketHeader PES_header;
+	bool HeaderRead = false;
+	bool PcktLost = false; //flaga ktora przerywa odczytywanie do momentu nowego pakietu
+public:
+	void Parser(char c, int p, Header PacketHeader, adaptationField AF, Header NextHeader, ofstream& PID136) {
+		if (PacketHeader.getCC() == 0) {
+			PcktLost = false;
+		}
+		if ((PacketHeader.getCC() - 1 == PacketHeader.getLastCC() or PacketHeader.getCC() == 0) and !PcktLost) { //sprawdzanie ciaglosci CC
+			if (PacketHeader.getAFC() != 1 and PacketHeader.getS() and (PacketHeader.getPID() == 136 /*or PacketHeader.getPID() == 174*/)) {
+				if (p % PacketSize >= (6 + AF.getOffsetValue())) {
+					if ((PacketHeader.getS() and (PacketHeader.getPID() == 136 /*or PacketHeader.getPID() == 174*/)) or (HeaderRead)) { //tylko audio
+						if (p % PacketSize == (6 + AF.getOffsetValue())) {
+							cout << " Started";
+						}
+						HeaderRead = true;
+						PES_header.Parser(c, p, AF);
+					}
+					HeaderRead = false;
+				}
+
+				if (p % PacketSize >= (6 + AF.getOffsetValue())) { //header + AF
+					PESdataCounter++;
+					Assembler(c, p, PacketHeader, PID136, NextHeader, AF);
+				}
+
+				if (!PES_header.extensionPresent()) {
+					headerSize = 6;
+				}
+				else if (PES_header.extensionPresent() and !PES_header.PTS_present() and !PES_header.DTS_present()) {
+					headerSize = 9;
+				}
+				else if (PES_header.extensionPresent() and PES_header.PTS_present() and !PES_header.DTS_present()) {
+					headerSize = 14;
+				}
+				else if (PES_header.extensionPresent() and PES_header.PTS_present() and PES_header.DTS_present()) {
+					headerSize = 19;
+				}
+
+			}
+
+			else if (PacketHeader.getAFC() == 1 and (PacketHeader.getPID() == 136 /*or PacketHeader.getPID() == 174*/) and headerSize != 0) {
+
+				if (p % PacketSize == headerSize) {
+					cout << " Continue ";
+				}
+
+				if (p % PacketSize >= 4) { //sam header
+					PESdataCounter++; //liczymy payload z pakietu zawierajacego AF
+					Assembler(c, p, PacketHeader, PID136, NextHeader, AF);
+				}
+			}
+
+			if (PacketHeader.getAFC() != 1 and !PacketHeader.getS() and NextHeader.getS() and (PacketHeader.getPID() == 136 /*or PacketHeader.getPID() == 174*/)) { //koniec
+
+				if (p % PacketSize > (4 + AF.getLength())) { //header + AF length
+					PESdataCounter++;
+					Assembler(c, p, PacketHeader, PID136, NextHeader, AF);
+				}
+
+				if (p % PacketSize == 187) {
+					cout << " Finished PES: PcktLen = " << PESdataCounter
+						<< " HeadLen: " << headerSize
+							<< " DataLen: " << PESdataCounter - headerSize;
+						PESdataCounter = 0;
+				}
+			}
+		}
+		else if ((PacketHeader.getPID() == 136 /*or PacketHeader.getPID() == 174*/)) {
+			if (p % PacketSize == 8) {
+				PcktLost = true;
+				cout << " PcktLost ";
+			}
+		}
+	}
+
+	void Assembler(char c, int p, Header PacketHeader, ofstream& PID136, Header NextHeader, adaptationField AF) {
+			if (PID136.is_open()) {
+				PID136 << c;
+			}
+			else cout << "Unable to open file";
+	}
+};
+
+
+int main()
+{
+	fstream file("example_new.ts", ios::binary | ios::in);
+	fstream nextPacket("example_new.ts", ios::binary | ios::in);
+
+	unsigned int counter = 0;
+	char c;
+	char next;
+	Header header;
+	Header headerNext;
+	adaptationField AF;
+	PES_Assembler PES;
+	uint8_t PacketSize = 188;
+
+	for (int i = 0; i < 188; i++) { //przesuwamy o jeden pakiet do przodu
+		nextPacket.get(next);
+	}
+
+	ofstream PID136;
+	PID136.open("PID136.mp2", ios::binary | ios::out);
+
+	for (int i = 0; file.get(c); i++) {
+		nextPacket.get(next); //dzieki temu zyskujemy informacje o nastepnym pakiecie 
+
+		if (i % PacketSize == 0) {
+			if (counter != 0) cout << endl;
+			cout << setfill('0') << setw(10) << counter++ << " ";
+		}
+		if (i % PacketSize < 4) {
+			headerNext.Parser(next, i);
+			header.Parser(c, i);
+			if (i % PacketSize == 3) {
+				header.Print();
+			}
+		}
+		if (header.getAFC() != 1 and (i % PacketSize >= 4)) {
+			if (header.getPID() == 136) {
+				AF.Parser(c, i);
+			}
+		}
+		if (AF.Alldone()) { //czytamy PES po zakonczeniu AF
+			PES.Parser(c, i, header, AF, headerNext, PID136);
+		}
+	}
+
+	PID136.close();
+
+	return 0;
+}

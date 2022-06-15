@@ -1,0 +1,62 @@
+﻿  Parser.cpp
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(39,1): warning C4244: "+=": konwersja z "double" do "uint16_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(51,1): warning C4244: "+=": konwersja z "double" do "uint16_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(64,1): warning C4244: "+=": konwersja z "double" do "uint8_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(66,1): warning C4244: "+=": konwersja z "double" do "uint8_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(68,1): warning C4244: "+=": konwersja z "double" do "uint8_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(86,29): warning C4244: "return": konwersja z "uint16_t" do "uint8_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(174,1): warning C4244: "+=": konwersja z "double" do "uint64_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(180,1): warning C4244: "+=": konwersja z "double" do "uint64_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(186,1): warning C4244: "+=": konwersja z "double" do "uint64_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(192,1): warning C4244: "+=": konwersja z "double" do "uint64_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(197,1): warning C4244: "+=": konwersja z "double" do "uint64_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(201,1): warning C4244: "+=": konwersja z "double" do "uint16_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(207,1): warning C4244: "+=": konwersja z "double" do "uint16_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(224,1): warning C4244: "+=": konwersja z "double" do "uint64_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(230,1): warning C4244: "+=": konwersja z "double" do "uint64_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(236,1): warning C4244: "+=": konwersja z "double" do "uint64_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(242,1): warning C4244: "+=": konwersja z "double" do "uint64_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(247,1): warning C4244: "+=": konwersja z "double" do "uint64_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(251,1): warning C4244: "+=": konwersja z "double" do "uint16_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(256,1): warning C4244: "+=": konwersja z "double" do "uint16_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(270,1): warning C4244: "+=": konwersja z "double" do "uint8_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(283,1): warning C4244: "+=": konwersja z "double" do "uint8_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(289,1): warning C4244: "+=": konwersja z "double" do "uint8_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(302,1): warning C4244: "+=": konwersja z "double" do "uint8_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(323,1): warning C4244: "+=": konwersja z "double" do "uint16_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(329,1): warning C4244: "+=": konwersja z "double" do "uint16_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(341,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(347,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(353,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(368,1): warning C4244: "+=": konwersja z "double" do "uint8_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(372,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(375,1): warning C4244: "+=": konwersja z "double" do "uint8_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(380,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(386,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(388,1): warning C4244: "+=": konwersja z "double" do "uint8_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(393,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(399,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(401,1): warning C4244: "+=": konwersja z "double" do "uint8_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(473,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(479,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(485,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(495,1): warning C4244: "+=": konwersja z "double" do "uint8_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(498,48): warning C4804: "<=": niebezpieczne użycie typu "bool" w operacji
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(498,92): warning C4804: "<=": niebezpieczne użycie typu "bool" w operacji
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(508,1): warning C4244: "+=": konwersja z "double" do "uint16_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(514,1): warning C4244: "+=": konwersja z "double" do "uint16_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(539,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(544,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(550,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(556,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(562,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(575,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(580,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(586,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(592,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Parser\Parser.cpp(598,1): warning C4244: "+=": konwersja z "double" do "uint32_t", możliwa utrata danych
+  Trwa generowanie kodu
+  Previous IPDB and IOBJ mismatch, fall back to full compilation.
+  All 178 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Zakończono generowanie kodu
+  Parser.vcxproj -> C:\Users\kubao\Documents\Studia\Studia_6_sem\PDM\lab\Projekt\Parser\Release\Parser.exe
